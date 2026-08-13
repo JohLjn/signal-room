@@ -4,10 +4,11 @@ import {
   ActivityTypeSchema,
   IncidentSeveritySchema,
   IncidentStatusSchema,
-  IsoDateTimeSchema,
   UuidSchema,
 } from "@/contracts/domain";
 import type { AuthContext } from "@/lib/auth-context";
+
+const IsoDateTimeSchema = z.string().datetime({ offset: true });
 
 export const UserSummarySchema = z.object({
   id: UuidSchema,
