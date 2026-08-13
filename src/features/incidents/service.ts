@@ -84,7 +84,7 @@ export class IncidentService implements IncidentServiceContract {
     const input = parse(() => UpdateIncidentInputSchema.parse(rawInput));
     await withTransaction(this.database, async (transaction) => {
       const incidents = new IncidentRepository(transaction);
-      const current = await incidents.find(authContext.workspaceId, id);
+      const current = await incidents.findForUpdate(authContext.workspaceId, id);
       if (!current) throw new AppError("NOT_FOUND", "Incident not found.");
       if (current.ownerId !== authContext.userId && authContext.membershipRole !== "admin") {
         throw new AppError("FORBIDDEN", "Only the incident owner or an administrator can update it.");
@@ -149,7 +149,7 @@ export class IncidentService implements IncidentServiceContract {
     const input = parse(() => AddCommentInputSchema.parse(rawInput));
     return withTransaction(this.database, async (transaction) => {
       const incidents = new IncidentRepository(transaction);
-      if (!(await incidents.find(authContext.workspaceId, id))) {
+      if (!(await incidents.findForUpdate(authContext.workspaceId, id))) {
         throw new AppError("NOT_FOUND", "Incident not found.");
       }
       const comment = await new CommentRepository(transaction).create({

@@ -29,6 +29,16 @@ export class IncidentRepository {
     return incident ?? null;
   }
 
+  async findForUpdate(workspaceId: string, incidentId: string): Promise<IncidentRecord | null> {
+    const [incident] = await this.database
+      .select()
+      .from(incidents)
+      .where(and(eq(incidents.workspaceId, workspaceId), eq(incidents.id, incidentId)))
+      .limit(1)
+      .for("update");
+    return incident ?? null;
+  }
+
   async list(workspaceId: string): Promise<IncidentSummary[]> {
     const rows = await this.database
       .select({

@@ -1,6 +1,14 @@
+import { and, eq } from "drizzle-orm";
 import { afterAll, beforeEach, describe, expect, it } from "vitest";
 
-import { activityEntries, comments, users, workspaceMemberships, workspaces } from "@/db/schema";
+import {
+  activityEntries,
+  comments,
+  incidents,
+  users,
+  workspaceMemberships,
+  workspaces,
+} from "@/db/schema";
 import { IncidentService } from "@/features/incidents/service";
 import { createAuthContext, type AuthContext } from "@/lib/auth-context";
 import { AppError } from "@/lib/errors";
@@ -61,6 +69,25 @@ async function createIncident(context: AuthContext, ownerId: string) {
   });
 }
 
+async function waitForLockWait(
+  applicationName: string,
+  deadline = Date.now() + 5_000,
+): Promise<void> {
+  const [{ waiting }] = await sql<{ waiting: boolean }[]>`
+    SELECT EXISTS (
+      SELECT 1
+      FROM pg_stat_activity
+      WHERE application_name = ${applicationName}
+        AND wait_event_type = 'Lock'
+    ) AS waiting
+  `;
+  if (waiting) return;
+  if (Date.now() >= deadline) {
+    throw new Error(`Timed out waiting for PostgreSQL lock wait: ${applicationName}`);
+  }
+  return waitForLockWait(applicationName, deadline);
+}
+
 beforeEach(async () => {
   await sql`DROP TRIGGER IF EXISTS reject_activity ON activity_entries`;
   await sql`DROP FUNCTION IF EXISTS reject_test_activity()`;
@@ -116,6 +143,101 @@ describe("incident lifecycle", () => {
     await expect(
       service.updateIncident(data.adminContext, created.id, { status: "resolved" }),
     ).resolves.toMatchObject({ status: "resolved" });
+  });
+
+  it("rechecks ownership after waiting for a concurrent owner change", async () => {
+    const data = await seed();
+    const created = await createIncident(data.ownerContext, data.owner.id);
+    const blocker = createTestDatabase();
+    const contender = createTestDatabase();
+    const applicationName = `stale-owner-${created.id}`;
+    let releaseBlocker = () => {};
+    const blockerGate = new Promise<void>((resolve) => {
+      releaseBlocker = resolve;
+    });
+    let markBlockerReady = () => {};
+    const blockerReady = new Promise<void>((resolve) => {
+      markBlockerReady = resolve;
+    });
+
+    try {
+      await contender.sql`SELECT set_config('application_name', ${applicationName}, false)`;
+      const blockerMutation = blocker.database.transaction(async (transaction) => {
+        await transaction
+          .update(incidents)
+          .set({ ownerId: data.member.id })
+          .where(and(eq(incidents.workspaceId, data.alpha.id), eq(incidents.id, created.id)));
+        markBlockerReady();
+        await blockerGate;
+      });
+      await blockerReady;
+
+      const mutation = new IncidentService(contender.database).updateIncident(
+        data.ownerContext,
+        created.id,
+        { status: "resolved" },
+      );
+      await waitForLockWait(applicationName);
+      releaseBlocker();
+      await blockerMutation;
+
+      await expect(mutation).rejects.toMatchObject({ code: "FORBIDDEN" });
+      const loaded = await service.getIncident(data.adminContext, created.id);
+      expect(loaded).toMatchObject({ status: "open", owner: { id: data.member.id } });
+      expect(loaded.activity.some((entry) => entry.type === "status_changed")).toBe(false);
+    } finally {
+      releaseBlocker();
+      await Promise.all([blocker.sql.end(), contender.sql.end()]);
+    }
+  });
+
+  it("records activity from the state committed while a concurrent update waits", async () => {
+    const data = await seed();
+    const created = await createIncident(data.ownerContext, data.owner.id);
+    const blocker = createTestDatabase();
+    const contender = createTestDatabase();
+    const applicationName = `stale-activity-${created.id}`;
+    let releaseBlocker = () => {};
+    const blockerGate = new Promise<void>((resolve) => {
+      releaseBlocker = resolve;
+    });
+    let markBlockerReady = () => {};
+    const blockerReady = new Promise<void>((resolve) => {
+      markBlockerReady = resolve;
+    });
+
+    try {
+      await contender.sql`SELECT set_config('application_name', ${applicationName}, false)`;
+      const blockerMutation = blocker.database.transaction(async (transaction) => {
+        await transaction
+          .update(incidents)
+          .set({ status: "investigating" })
+          .where(and(eq(incidents.workspaceId, data.alpha.id), eq(incidents.id, created.id)));
+        markBlockerReady();
+        await blockerGate;
+      });
+      await blockerReady;
+
+      const mutation = new IncidentService(contender.database).updateIncident(
+        data.ownerContext,
+        created.id,
+        { status: "resolved" },
+      );
+      await waitForLockWait(applicationName);
+      releaseBlocker();
+      await blockerMutation;
+      await mutation;
+
+      const loaded = await service.getIncident(data.ownerContext, created.id);
+      expect(loaded.status).toBe("resolved");
+      expect(loaded.activity.find((entry) => entry.type === "status_changed")?.details).toEqual({
+        from: "investigating",
+        to: "resolved",
+      });
+    } finally {
+      releaseBlocker();
+      await Promise.all([blocker.sql.end(), contender.sql.end()]);
+    }
   });
 
   it("rejects an owner outside the workspace", async () => {
