@@ -1,0 +1,167 @@
+.dashboard {
+  width: min(1120px, calc(100% - 40px));
+  margin: 0 auto;
+  padding: 56px 0 80px;
+  display: grid;
+  gap: 48px;
+}
+
+.header {
+  display: grid;
+  gap: 10px;
+}
+
+.header h1 {
+  font-size: clamp(2rem, 6vw, 4.5rem);
+  letter-spacing: -0.055em;
+  line-height: 0.95;
+}
+
+.header > p:last-child {
+  color: #5d6470;
+  font-size: 1.05rem;
+}
+
+.eyebrow,
+.metricLabel {
+  color: #68707d;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.sectionTitle {
+  margin-bottom: 18px;
+  font-size: 1.35rem;
+}
+
+.metricGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 12px;
+}
+
+.metric {
+  min-height: 120px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  border: 1px solid #dce0e5;
+  border-radius: 14px;
+  background: #f8f9fa;
+}
+
+.metricValue {
+  font-size: 2.25rem;
+  line-height: 1;
+}
+
+.sectionHeading,
+.incidentCard,
+.incidentMetadata {
+  display: flex;
+  align-items: center;
+}
+
+.sectionHeading {
+  justify-content: space-between;
+  gap: 20px;
+}
+
+.sectionHeading .sectionTitle {
+  margin: 4px 0 18px;
+}
+
+.createLink {
+  padding: 10px 14px;
+  border-radius: 999px;
+  color: #fff;
+  background: #171717;
+  font-size: 0.9rem;
+  font-weight: 700;
+}
+
+.incidentList {
+  display: grid;
+  border-top: 1px solid #dce0e5;
+  list-style: none;
+}
+
+.incidentCard {
+  justify-content: space-between;
+  gap: 24px;
+  padding: 20px 4px;
+  border-bottom: 1px solid #dce0e5;
+}
+
+.incidentMain {
+  display: grid;
+  gap: 6px;
+}
+
+.incidentTitle {
+  font-size: 1.05rem;
+  font-weight: 700;
+}
+
+.incidentTitle:hover {
+  text-decoration: underline;
+}
+
+.owner,
+.updatedAt,
+.emptyState {
+  color: #68707d;
+  font-size: 0.875rem;
+}
+
+.incidentMetadata {
+  justify-content: flex-end;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.badge {
+  padding: 5px 8px;
+  border: 1px solid #d4d8de;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: capitalize;
+}
+
+.updatedAt {
+  min-width: 190px;
+  text-align: right;
+}
+
+.emptyState {
+  padding: 30px;
+  border: 1px dashed #c9ced6;
+  border-radius: 14px;
+  text-align: center;
+}
+
+@media (max-width: 720px) {
+  .dashboard {
+    width: min(100% - 28px, 1120px);
+    padding-top: 32px;
+  }
+
+  .incidentCard {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .incidentMetadata {
+    justify-content: flex-start;
+  }
+
+  .updatedAt {
+    width: 100%;
+    min-width: 0;
+    text-align: left;
+  }
+}
