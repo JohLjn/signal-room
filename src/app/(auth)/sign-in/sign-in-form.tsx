@@ -1,0 +1,46 @@
+"use client";
+
+import { useActionState } from "react";
+
+import {
+  signInWithCredentials,
+  type SignInState,
+} from "@/features/auth/actions";
+
+const initialState: SignInState = {};
+
+export function SignInForm() {
+  const [state, action, pending] = useActionState(
+    signInWithCredentials,
+    initialState,
+  );
+
+  return (
+    <form action={action}>
+      <div>
+        <label htmlFor="email">Email</label>
+        <input
+          autoComplete="email"
+          id="email"
+          name="email"
+          required
+          type="email"
+        />
+      </div>
+      <div>
+        <label htmlFor="password">Password</label>
+        <input
+          autoComplete="current-password"
+          id="password"
+          name="password"
+          required
+          type="password"
+        />
+      </div>
+      {state.error ? <p role="alert">{state.error}</p> : null}
+      <button disabled={pending} type="submit">
+        {pending ? "Signing in…" : "Sign in"}
+      </button>
+    </form>
+  );
+}
