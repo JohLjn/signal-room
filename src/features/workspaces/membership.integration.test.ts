@@ -3,7 +3,10 @@ import { afterAll, describe, expect, it } from "vitest";
 
 import { users, workspaceMemberships, workspaces } from "@/db/schema";
 import { verifyCredentials } from "@/features/auth/credentials";
-import { resolveWorkspaceMembership } from "@/features/workspaces/membership";
+import {
+  resolveFirstWorkspaceMembership,
+  resolveWorkspaceMembership,
+} from "@/features/workspaces/membership";
 import { AppError } from "@/lib/errors";
 import { createTestDatabase } from "@/test/database/client";
 
@@ -80,5 +83,74 @@ describe("persisted authentication and workspace membership", () => {
     await expect(
       resolveWorkspaceMembership(user.id, otherWorkspace.slug, database),
     ).rejects.toEqual(expect.objectContaining<Partial<AppError>>({ code: "NOT_FOUND" }));
+  });
+
+  it("resolves the first membership by creation time and then workspace slug", async () => {
+    const [user] = await database
+      .insert(users)
+      .values({
+        email: "first-workspace-agent@example.com",
+        name: "First Workspace Agent",
+        passwordHash: await hash("password", { type: argon2id }),
+      })
+      .returning({ id: users.id });
+    const workspaceRows = await database
+      .insert(workspaces)
+      .values([
+        { slug: "zulu-workspace", name: "Zulu Workspace" },
+        { slug: "alpha-workspace", name: "Alpha Workspace" },
+        { slug: "later-workspace", name: "Later Workspace" },
+      ])
+      .returning({ id: workspaces.id, slug: workspaces.slug });
+    const workspaceBySlug = new Map(
+      workspaceRows.map((workspace) => [workspace.slug, workspace]),
+    );
+    const firstCreatedAt = new Date("2026-01-01T00:00:00.000Z");
+
+    await database.insert(workspaceMemberships).values([
+      {
+        userId: user.id,
+        workspaceId: workspaceBySlug.get("zulu-workspace")!.id,
+        role: "member",
+        createdAt: firstCreatedAt,
+      },
+      {
+        userId: user.id,
+        workspaceId: workspaceBySlug.get("alpha-workspace")!.id,
+        role: "admin",
+        createdAt: firstCreatedAt,
+      },
+      {
+        userId: user.id,
+        workspaceId: workspaceBySlug.get("later-workspace")!.id,
+        role: "member",
+        createdAt: new Date("2026-01-02T00:00:00.000Z"),
+      },
+    ]);
+
+    await expect(
+      resolveFirstWorkspaceMembership(user.id, database),
+    ).resolves.toEqual({
+      workspaceId: workspaceBySlug.get("alpha-workspace")!.id,
+      workspaceSlug: "alpha-workspace",
+      role: "admin",
+    });
+  });
+
+  it("does not resolve a workspace for a user without memberships", async () => {
+    const [user] = await database
+      .insert(users)
+      .values({
+        email: "no-workspace-agent@example.com",
+        name: "No Workspace Agent",
+        passwordHash: await hash("password", { type: argon2id }),
+      })
+      .returning({ id: users.id });
+
+    await expect(
+      resolveFirstWorkspaceMembership(user.id, database),
+    ).rejects.toEqual(
+      expect.objectContaining<Partial<AppError>>({ code: "NOT_FOUND" }),
+    );
   });
 });
