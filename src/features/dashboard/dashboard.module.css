@@ -83,6 +83,10 @@
   font-weight: 700;
 }
 
+.createLink:hover {
+  background: #343434;
+}
+
 .incidentList {
   display: grid;
   border-top: 1px solid #dce0e5;
@@ -132,6 +136,22 @@
   text-transform: capitalize;
 }
 
+.status_open {
+  border-color: #b9cde6;
+  background: #f2f7fc;
+}
+
+.status_investigating,
+.severityHigh {
+  border-color: #e7c98c;
+  background: #fff8e8;
+}
+
+.status_resolved {
+  border-color: #b9d9c7;
+  background: #f1faf5;
+}
+
 .updatedAt {
   min-width: 190px;
   text-align: right;
@@ -151,6 +171,11 @@
   }
 
   .incidentCard {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .sectionHeading {
     align-items: flex-start;
     flex-direction: column;
   }

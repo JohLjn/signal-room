@@ -21,6 +21,10 @@ test("critical authenticated incident workflow", async ({ page }) => {
   await expect(page.getByRole("heading", { name: "Operations dashboard" })).toBeVisible();
 
   await page.getByRole("link", { name: "New incident" }).click();
+  await page.getByRole("link", { name: "Cancel" }).click();
+  await expect(page).toHaveURL(/\/w\/operations$/);
+
+  await page.getByRole("link", { name: "New incident" }).click();
   await page.getByLabel("Title").fill("Production workflow incident");
   await page.getByLabel("Description").fill("Verified through the complete application stack");
   await page.getByLabel("Status").selectOption("open");
@@ -54,7 +58,8 @@ test("critical authenticated incident workflow", async ({ page }) => {
   await expect(page.getByText(`changed owner from ${seeded.admin.name} to ${seeded.member.name}`)).toBeVisible();
   await expect(page.getByText("added a comment")).toBeVisible();
 
-  await page.goto("/w/operations");
+  await page.getByRole("link", { name: "SignalRoom Dashboard" }).click();
+  await expect(page).toHaveURL(/\/w\/operations$/);
   const incidentCard = page.getByRole("listitem").filter({ hasText: "Production workflow incident" });
   await expect(incidentCard).toContainText("investigating");
   await expect(incidentCard).toContainText("SEV1");

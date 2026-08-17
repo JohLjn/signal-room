@@ -1,4 +1,6 @@
 import type { ActivityEntryView } from "@/contracts/incidents";
+import { LocalDateTime } from "@/features/incidents/components/local-date-time";
+import styles from "@/features/incidents/components/incident.module.css";
 
 function description(entry: ActivityEntryView): string {
   switch (entry.type) {
@@ -21,13 +23,13 @@ function description(entry: ActivityEntryView): string {
 
 export function ActivityTimeline({ entries }: { entries: ActivityEntryView[] }) {
   return (
-    <section>
+    <section className={styles.sectionCard}>
       <h2>Activity</h2>
-      <ol>
+      <ol className={styles.activityList}>
         {entries.map((entry) => (
-          <li key={entry.id}>
+          <li className={styles.activityRow} key={entry.id}>
             <strong>{entry.actor.name}</strong> {description(entry)}{" "}
-            <time dateTime={entry.createdAt}>{new Date(entry.createdAt).toLocaleString()}</time>
+            <span className={styles.activityTime}><LocalDateTime value={entry.createdAt} /></span>
           </li>
         ))}
       </ol>

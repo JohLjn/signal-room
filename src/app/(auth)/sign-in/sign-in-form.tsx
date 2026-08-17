@@ -7,6 +7,8 @@ import {
   type SignInState,
 } from "@/features/auth/actions";
 
+import styles from "./sign-in.module.css";
+
 const initialState: SignInState = {};
 
 export function SignInForm() {
@@ -16,8 +18,8 @@ export function SignInForm() {
   );
 
   return (
-    <form action={action}>
-      <div>
+    <form action={action} className={styles.form}>
+      <div className={styles.field}>
         <label htmlFor="email">Email</label>
         <input
           autoComplete="email"
@@ -27,7 +29,7 @@ export function SignInForm() {
           type="email"
         />
       </div>
-      <div>
+      <div className={styles.field}>
         <label htmlFor="password">Password</label>
         <input
           autoComplete="current-password"
@@ -37,8 +39,8 @@ export function SignInForm() {
           type="password"
         />
       </div>
-      {state.error ? <p role="alert">{state.error}</p> : null}
-      <button disabled={pending} type="submit">
+      {state.error ? <p className={styles.error} role="alert">{state.error}</p> : null}
+      <button className={styles.submitButton} disabled={pending} type="submit">
         {pending ? "Signing in…" : "Sign in"}
       </button>
     </form>

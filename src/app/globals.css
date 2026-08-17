@@ -34,3 +34,15 @@ a {
   color: inherit;
   text-decoration: none;
 }
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+}
+
+:where(a, button, input, select, textarea):focus-visible {
+  outline: 3px solid #7c9cff;
+  outline-offset: 2px;
+}

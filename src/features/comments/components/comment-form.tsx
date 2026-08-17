@@ -4,6 +4,8 @@ import { useState, type FormEvent } from "react";
 
 import { routes } from "@/contracts/routes";
 
+import styles from "@/features/incidents/components/incident.module.css";
+
 export function CommentForm({ workspaceSlug, incidentId }: { workspaceSlug: string; incidentId: string }) {
   const [error, setError] = useState("");
   const [pending, setPending] = useState(false);
@@ -27,12 +29,14 @@ export function CommentForm({ workspaceSlug, incidentId }: { workspaceSlug: stri
   }
 
   return (
-    <form onSubmit={submit}>
+    <form className={`${styles.sectionCard} ${styles.commentForm}`} onSubmit={submit}>
       <h2>Add comment</h2>
-      <textarea name="body" required maxLength={10_000} rows={4} />
-      <br />
-      <button disabled={pending}>{pending ? "Adding…" : "Add comment"}</button>
-      {error && <p role="alert">{error}</p>}
+      <label className={styles.commentLabel} htmlFor="comment-body">Comment</label>
+      <textarea id="comment-body" name="body" required maxLength={10_000} rows={4} />
+      <div className={styles.actions}>
+        <button className={styles.primaryButton} disabled={pending}>{pending ? "Adding…" : "Add comment"}</button>
+      </div>
+      {error && <p className={styles.error} role="alert">{error}</p>}
     </form>
   );
 }

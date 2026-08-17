@@ -1,0 +1,52 @@
+.appHeader {
+  border-bottom: 1px solid #dce0e5;
+  background: #fff;
+}
+
+.appHeaderInner {
+  width: min(1120px, calc(100% - 40px));
+  min-height: 64px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+}
+
+.homeLink {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 10px;
+  font-weight: 800;
+}
+
+.homeLabel {
+  color: #68707d;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.signOutButton {
+  padding: 8px 12px;
+  border: 1px solid #d4d8de;
+  border-radius: 9px;
+  color: #343a43;
+  background: #fff;
+  cursor: pointer;
+  font-weight: 700;
+}
+
+.signOutButton:hover {
+  background: #f5f6f7;
+}
+
+@media (max-width: 720px) {
+  .appHeaderInner {
+    width: min(100% - 28px, 1120px);
+    min-height: 58px;
+  }
+
+  .homeLabel {
+    display: none;
+  }
+}

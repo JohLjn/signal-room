@@ -5,6 +5,8 @@ import { incidentService } from "@/features/incidents/service";
 import { resolveAuthContext } from "@/features/workspaces/resolve-auth-context";
 import { isAppError } from "@/lib/errors";
 
+import styles from "@/features/incidents/components/incident.module.css";
+
 export default async function NewIncidentPage({
   params,
 }: {
@@ -29,8 +31,14 @@ export default async function NewIncidentPage({
   }
 
   return (
-    <main>
-      <h1>Create incident</h1>
+    <main className={styles.page}>
+      <header className={styles.pageHeader}>
+        <p className={styles.eyebrow}>Incident management</p>
+        <h1>Create incident</h1>
+        <p className={styles.lede}>
+          Capture the operational impact and assign clear ownership.
+        </p>
+      </header>
       <IncidentForm members={members} workspaceSlug={workspaceSlug} />
     </main>
   );

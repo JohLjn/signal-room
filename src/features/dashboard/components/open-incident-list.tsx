@@ -2,6 +2,7 @@ import Link from "next/link";
 
 import type { DashboardResult } from "@/contracts/dashboard";
 import { routes } from "@/contracts/routes";
+import { severityLabel, statusLabel } from "@/features/incidents/components/incident-presentation";
 
 import styles from "../dashboard.module.css";
 import { LastUpdated } from "./last-updated";
@@ -45,8 +46,12 @@ export function OpenIncidentList({
                 <span className={styles.owner}>Owned by {incident.owner.name}</span>
               </div>
               <div className={styles.incidentMetadata}>
-                <span className={styles.badge}>{incident.status}</span>
-                <span className={styles.badge}>{incident.severity.toUpperCase()}</span>
+                <span className={`${styles.badge} ${styles[`status_${incident.status}`]}`}>
+                  {statusLabel(incident.status)}
+                </span>
+                <span className={`${styles.badge} ${incident.severity === "sev1" || incident.severity === "sev2" ? styles.severityHigh : ""}`}>
+                  {severityLabel(incident.severity)}
+                </span>
                 <span className={styles.updatedAt}>
                   Updated <LastUpdated value={incident.updatedAt} />
                 </span>

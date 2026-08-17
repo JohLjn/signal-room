@@ -1,0 +1,293 @@
+.page,
+.detail {
+  width: min(900px, calc(100% - 40px));
+  margin: 0 auto;
+  padding: 48px 0 80px;
+}
+
+.pageHeader,
+.detailHeader {
+  display: grid;
+  gap: 10px;
+  margin-bottom: 28px;
+}
+
+.eyebrow {
+  color: #68707d;
+  font-size: 0.75rem;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.pageHeader h1,
+.detailHeader h1 {
+  font-size: clamp(2rem, 6vw, 3.5rem);
+  letter-spacing: -0.045em;
+  line-height: 1;
+}
+
+.lede,
+.description {
+  max-width: 70ch;
+  color: #5d6470;
+  font-size: 1.02rem;
+  line-height: 1.65;
+}
+
+.formCard,
+.sectionCard {
+  padding: 24px;
+  border: 1px solid #dce0e5;
+  border-radius: 14px;
+  background: #fff;
+}
+
+.createForm,
+.updateForm,
+.commentForm {
+  display: grid;
+  gap: 20px;
+}
+
+.field,
+.compactField {
+  display: grid;
+  gap: 7px;
+}
+
+.field label,
+.compactField label,
+.commentLabel {
+  font-size: 0.9rem;
+  font-weight: 700;
+}
+
+.field input,
+.field textarea,
+.field select,
+.compactField select,
+.commentForm textarea {
+  width: 100%;
+  min-width: 0;
+  padding: 10px 12px;
+  border: 1px solid #c9ced6;
+  border-radius: 9px;
+  color: #171717;
+  background: #fff;
+}
+
+.field input,
+.field select,
+.compactField select {
+  min-height: 44px;
+}
+
+.field textarea,
+.commentForm textarea {
+  resize: vertical;
+  line-height: 1.55;
+}
+
+.field input:hover,
+.field textarea:hover,
+.field select:hover,
+.compactField select:hover,
+.commentForm textarea:hover {
+  border-color: #929aa6;
+}
+
+.fieldGrid,
+.controlGrid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.primaryButton,
+.secondaryLink {
+  min-height: 42px;
+  padding: 9px 14px;
+  border-radius: 9px;
+  font-weight: 800;
+}
+
+.primaryButton {
+  border: 1px solid #171717;
+  color: #fff;
+  background: #171717;
+  cursor: pointer;
+}
+
+.primaryButton:hover:not(:disabled) {
+  background: #343434;
+}
+
+.primaryButton:disabled {
+  cursor: wait;
+  opacity: 0.58;
+}
+
+.secondaryLink {
+  display: inline-flex;
+  align-items: center;
+  border: 1px solid #d4d8de;
+  color: #343a43;
+  background: #fff;
+}
+
+.secondaryLink:hover {
+  background: #f5f6f7;
+}
+
+.error {
+  padding: 10px 12px;
+  border: 1px solid #e6b8b8;
+  border-radius: 9px;
+  color: #8b2525;
+  background: #fff5f5;
+  font-size: 0.9rem;
+  line-height: 1.4;
+}
+
+.detail {
+  display: grid;
+  gap: 24px;
+}
+
+.detailHeader {
+  margin-bottom: 0;
+  padding-bottom: 4px;
+}
+
+.metadata {
+  padding: 18px 20px;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 18px;
+  border: 1px solid #dce0e5;
+  border-radius: 14px;
+  background: #f8f9fa;
+}
+
+.metadataItem {
+  display: grid;
+  gap: 7px;
+}
+
+.metadataItem dt {
+  color: #68707d;
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.metadataItem dd {
+  font-weight: 700;
+}
+
+.badge {
+  width: fit-content;
+  padding: 5px 8px;
+  border: 1px solid #cbd1d8;
+  border-radius: 999px;
+  background: #fff;
+  font-size: 0.75rem;
+  font-weight: 800;
+}
+
+.statusOpen {
+  border-color: #b9cde6;
+  background: #f2f7fc;
+}
+
+.statusInvestigating,
+.severityHigh {
+  border-color: #e7c98c;
+  background: #fff8e8;
+}
+
+.statusResolved {
+  border-color: #b9d9c7;
+  background: #f1faf5;
+}
+
+.sectionCard {
+  display: grid;
+  gap: 18px;
+}
+
+.sectionCard h2,
+.updateForm h2,
+.commentForm h2 {
+  font-size: 1.25rem;
+}
+
+.commentList,
+.activityList {
+  list-style: none;
+  border-top: 1px solid #e3e6ea;
+}
+
+.commentRow,
+.activityRow {
+  padding: 16px 0;
+  border-bottom: 1px solid #e3e6ea;
+  line-height: 1.55;
+}
+
+.commentMeta,
+.activityTime,
+.emptyState {
+  color: #68707d;
+  font-size: 0.85rem;
+}
+
+.commentMeta {
+  margin-bottom: 5px;
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.commentBody {
+  white-space: pre-wrap;
+}
+
+.activityTime {
+  margin-left: 6px;
+  white-space: nowrap;
+}
+
+@media (max-width: 720px) {
+  .page,
+  .detail {
+    width: min(100% - 28px, 900px);
+    padding-top: 32px;
+  }
+
+  .fieldGrid,
+  .controlGrid,
+  .metadata {
+    grid-template-columns: 1fr;
+  }
+
+  .formCard,
+  .sectionCard {
+    padding: 20px;
+  }
+
+  .actions > * {
+    justify-content: center;
+  }
+}

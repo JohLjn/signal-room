@@ -1,8 +1,12 @@
+import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 
+import { routes } from "@/contracts/routes";
 import { signOutCurrentUser } from "@/features/auth/actions";
 import { resolveAuthContext } from "@/features/workspaces/resolve-auth-context";
 import { isAppError } from "@/lib/errors";
+
+import styles from "./workspace-layout.module.css";
 
 export default async function WorkspaceLayout({
   children,
@@ -29,10 +33,18 @@ export default async function WorkspaceLayout({
 
   return (
     <>
-      <header>
-        <form action={signOutCurrentUser}>
-          <button type="submit">Sign out</button>
-        </form>
+      <header className={styles.appHeader}>
+        <div className={styles.appHeaderInner}>
+          <Link className={styles.homeLink} href={routes.workspace(workspaceSlug)}>
+            <span>SignalRoom</span>
+            <span className={styles.homeLabel}>Dashboard</span>
+          </Link>
+          <form action={signOutCurrentUser}>
+            <button className={styles.signOutButton} type="submit">
+              Sign out
+            </button>
+          </form>
+        </div>
       </header>
       {children}
     </>
