@@ -1,36 +1,178 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# SignalRoom
 
-## Getting Started
+SignalRoom is a small internal incident-management application built with Next.js and PostgreSQL. Authenticated workspace members can create incidents, track status, severity, and ownership, add comments, review activity history, and monitor open work from a dashboard.
 
-First, run the development server:
+## Prerequisites
+
+- Node.js 20.9 or newer
+- pnpm 10.34.5 (the version declared in `package.json`)
+- PostgreSQL
+- Chromium installed through Playwright for browser verification
+
+Enable the pnpm version managed by Corepack if needed:
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+corepack enable
+corepack install
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Environment variables
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+Copy the example file for Next.js development and replace its placeholders:
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```bash
+cp .env.example .env.local
+```
 
-## Learn More
+| Variable | Purpose |
+| --- | --- |
+| `DATABASE_URL` | Persistent PostgreSQL database used by the application. |
+| `AUTH_SECRET` | Secret used to sign authentication state. Use a stable random value of at least 32 characters. |
+| `AUTH_URL` | Public base URL of the application, such as `http://localhost:3000` locally. |
+| `TEST_DATABASE_URL` | Dedicated, disposable PostgreSQL database used only by automated integration and Playwright tests. |
 
-To learn more about Next.js, take a look at the following resources:
+Generate an authentication secret locally with `openssl rand -base64 32`. Never use the placeholder from `.env.example` in a deployed environment.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+`DATABASE_URL` and `TEST_DATABASE_URL` must point to different databases. The integration and Playwright suites migrate and truncate/reset the test database. Never point `TEST_DATABASE_URL` at a development, staging, production, or otherwise valuable database.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Local PostgreSQL
 
-## Deploy on Vercel
+Create two databases: one persistent database for development and one disposable database for tests. For an existing local PostgreSQL installation, for example:
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+```bash
+createdb signal_room
+createdb signal_room_test
+```
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Example URLs are:
+
+```text
+DATABASE_URL=postgresql://localhost:5432/signal_room
+TEST_DATABASE_URL=postgresql://localhost:5432/signal_room_test
+```
+
+Adjust the username, password, host, port, and TLS query parameters for your PostgreSQL installation.
+
+### Optional Docker setup
+
+If Docker is available, a single local PostgreSQL container can host both databases:
+
+```bash
+docker run --name signal-room-postgres \
+  -e POSTGRES_USER=signalroom \
+  -e POSTGRES_PASSWORD=local-development-only \
+  -e POSTGRES_DB=signal_room \
+  -p 5432:5432 \
+  -d postgres:17
+
+docker exec signal-room-postgres \
+  createdb -U signalroom signal_room_test
+```
+
+Use these local-only URLs with that container:
+
+```text
+DATABASE_URL=postgresql://signalroom:local-development-only@localhost:5432/signal_room
+TEST_DATABASE_URL=postgresql://signalroom:local-development-only@localhost:5432/signal_room_test
+```
+
+The container example is optional and is not a deployment architecture.
+
+## Install and migrate
+
+Install the locked dependencies:
+
+```bash
+pnpm install --frozen-lockfile
+```
+
+Apply the committed migrations to the development database:
+
+```bash
+DATABASE_URL='postgresql://localhost:5432/signal_room' pnpm db:migrate
+```
+
+`pnpm db:migrate` reads `DATABASE_URL` directly from its process environment. Do not assume this command loads `.env.local`; export `DATABASE_URL` first or provide it inline as shown above.
+
+`pnpm db:generate` is for maintainers creating migration files after an approved schema change. It is not needed to initialize a clone.
+
+Migrations currently create an empty database. SignalRoom does not yet provide a development seed or bootstrap command, and the repository does not define default application credentials. A usable local workspace therefore requires separately provisioned users, password hashes, workspaces, and memberships.
+
+## Development
+
+After configuring `.env.local` and migrating the development database, start the application:
+
+```bash
+pnpm dev
+```
+
+Open [http://localhost:3000](http://localhost:3000). Next.js loads `.env.local` for the application server.
+
+## Verification
+
+Run static checks and unit tests without a database:
+
+```bash
+pnpm typecheck
+pnpm lint
+pnpm test:unit
+```
+
+Run the real-PostgreSQL integration suite against the disposable test database:
+
+```bash
+TEST_DATABASE_URL='postgresql://localhost:5432/signal_room_test' \
+  pnpm test:integration
+```
+
+The combined test command runs unit tests followed by the PostgreSQL integration suite, so it also requires `TEST_DATABASE_URL`:
+
+```bash
+TEST_DATABASE_URL='postgresql://localhost:5432/signal_room_test' pnpm test
+```
+
+For production-mode HTTP and browser verification, install Chromium once, build the application, and run Playwright:
+
+```bash
+pnpm exec playwright install chromium
+pnpm build
+TEST_DATABASE_URL='postgresql://localhost:5432/signal_room_test' \
+  pnpm exec playwright test
+```
+
+Playwright starts the existing production build with `next start` on `127.0.0.1:3100`. Its configuration supplies test-only authentication settings and maps the application database to `TEST_DATABASE_URL` while the suite runs.
+
+Both `pnpm test:integration` and `pnpm exec playwright test` migrate and truncate/reset `TEST_DATABASE_URL`. Use a dedicated disposable PostgreSQL database with no valuable data. The test harness rejects a test URL that matches `DATABASE_URL` when both are present, but that guard is not a substitute for checking the target yourself.
+
+## Production build and start
+
+With production environment variables available, build and start the application:
+
+```bash
+pnpm build
+pnpm start
+```
+
+Apply migrations separately before starting a release:
+
+```bash
+DATABASE_URL='postgresql://user:password@database-host:5432/signal_room' \
+  pnpm db:migrate
+```
+
+## Deployment requirements
+
+SignalRoom is a single Node.js application backed by PostgreSQL. A deployment must provide:
+
+- Node.js 20.9 or newer and the production build output.
+- Network access to a persistent PostgreSQL database through `DATABASE_URL`.
+- A stable, secret `AUTH_SECRET` of at least 32 characters.
+- `AUTH_URL` set to the externally reachable HTTPS application URL.
+- A release step that applies committed migrations exactly once or otherwise serializes migration execution before new application instances serve traffic.
+- Durable database backups and operational controls appropriate for incident data.
+
+Do not configure `TEST_DATABASE_URL` to reference a production or shared environment database. No specific hosting provider, managed database, container platform, proxy, or multi-region topology is required by the MVP architecture.
+
+## Architecture
+
+SignalRoom is a modular monolith. Pages and route handlers call application services, which enforce authorization and transaction boundaries before using PostgreSQL repositories. See [SPEC.md](./SPEC.md) for product scope and [ARCHITECTURE.md](./ARCHITECTURE.md) for the system design.
