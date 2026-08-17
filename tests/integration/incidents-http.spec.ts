@@ -71,12 +71,19 @@ test.describe("incident Route Handlers over HTTP", () => {
     expect(loaded.comments).toEqual([
       expect.objectContaining({ body: "Verified through the HTTP boundary" }),
     ]);
-    expect(loaded.activity.map(({ type }: { type: string }) => type)).toEqual([
-      "incident_created",
-      "status_changed",
-      "severity_changed",
-      "comment_added",
-    ]);
+    expect(loaded.activity).toHaveLength(4);
+    expect(loaded.activity).toEqual(expect.arrayContaining([
+      expect.objectContaining({ type: "incident_created", details: {} }),
+      expect.objectContaining({
+        type: "status_changed",
+        details: { from: "open", to: "investigating" },
+      }),
+      expect.objectContaining({
+        type: "severity_changed",
+        details: { from: "sev2", to: "sev1" },
+      }),
+      expect.objectContaining({ type: "comment_added", details: {} }),
+    ]));
   });
 
   test("enforces incident and workspace authorization", async ({ browser }) => {
