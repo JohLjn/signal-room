@@ -78,7 +78,7 @@ TEST_DATABASE_URL=postgresql://signalroom:local-development-only@localhost:5432/
 
 The container example is optional and is not a deployment architecture.
 
-## Install and migrate
+## Install and seed
 
 Install the locked dependencies:
 
@@ -86,21 +86,41 @@ Install the locked dependencies:
 pnpm install --frozen-lockfile
 ```
 
-Apply the committed migrations to the development database:
+Prepare the development database with the committed migrations and the small,
+safely rerunnable demo dataset:
 
 ```bash
-DATABASE_URL='postgresql://localhost:5432/signal_room' pnpm db:migrate
+pnpm db:seed
 ```
 
-`pnpm db:migrate` reads `DATABASE_URL` directly from its process environment. Do not assume this command loads `.env.local`; export `DATABASE_URL` first or provide it inline as shown above.
+`pnpm db:seed` explicitly loads the repository-root `.env.local`, applies pending
+migrations to `DATABASE_URL`, and reconciles only SignalRoom's reserved demo
+records. It does not truncate the database or remove unrelated development data.
+It refuses to run in test or production mode and refuses to target the disposable
+`signal_room_test` database.
+
+The local demo credentials are:
+
+| Role | Email | Password |
+| --- | --- | --- |
+| Admin | `admin@signalroom.test` | `signalroom-demo` |
+| Member | `member@signalroom.test` | `signalroom-demo` |
+
+These are public, local-development credentials. Never use them in a deployed
+environment.
+
+To apply migrations without seeding, provide `DATABASE_URL` directly because
+`pnpm db:migrate` does not load `.env.local`:
+
+```bash
+DATABASE_URL='postgresql://signalroom:signalroom@localhost:5432/signal_room' pnpm db:migrate
+```
 
 `pnpm db:generate` is for maintainers creating migration files after an approved schema change. It is not needed to initialize a clone.
 
-Migrations currently create an empty database. SignalRoom does not yet provide a development seed or bootstrap command, and the repository does not define default application credentials. A usable local workspace therefore requires separately provisioned users, password hashes, workspaces, and memberships.
-
 ## Development
 
-After configuring `.env.local` and migrating the development database, start the application:
+After configuring `.env.local` and running `pnpm db:seed`, start the application:
 
 ```bash
 pnpm dev
