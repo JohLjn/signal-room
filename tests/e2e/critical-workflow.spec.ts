@@ -61,7 +61,7 @@ test("critical authenticated incident workflow", async ({ page }) => {
   await page.getByRole("link", { name: "SignalRoom Dashboard" }).click();
   await expect(page).toHaveURL(/\/w\/operations$/);
   const incidentCard = page.getByRole("listitem").filter({ hasText: "Production workflow incident" });
-  await expect(incidentCard).toContainText("investigating");
+  await expect(incidentCard).toContainText("Investigating");
   await expect(incidentCard).toContainText("SEV1");
   await expect(incidentCard).toContainText(`Owned by ${seeded.member.name}`);
   const summary = page.getByRole("region", { name: "Incident summary" });

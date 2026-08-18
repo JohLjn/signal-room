@@ -46,7 +46,7 @@ export function IncidentForm({ workspaceSlug, members }: { workspaceSlug: string
         </div>
         <div className={styles.field}>
           <label htmlFor="incident-severity">Severity</label>
-          <select id="incident-severity" name="severity">{INCIDENT_SEVERITIES.map((value) => <option key={value}>{value.toUpperCase()}</option>)}</select>
+          <select id="incident-severity" name="severity">{INCIDENT_SEVERITIES.map((value) => <option key={value} value={value}>{value.toUpperCase()}</option>)}</select>
         </div>
         <div className={styles.field}>
           <label htmlFor="incident-owner">Owner</label>
