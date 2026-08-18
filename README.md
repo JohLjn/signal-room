@@ -2,6 +2,10 @@
 
 SignalRoom is a small internal incident-management application built with Next.js and PostgreSQL. Authenticated workspace members can create incidents, track status, severity, and ownership, add comments, review activity history, and monitor open work from a dashboard.
 
+## Engineering experiment
+
+SignalRoom was primarily built to explore a structured multi-agent software-engineering process. A shared [specification](./SPEC.md) and [architecture](./ARCHITECTURE.md) established the foundation, followed by bounded feature ownership in isolated Git worktrees, parallel feature implementation, serialized integration, independent review, and human triage. The [implementation plan](./AGENT_PLAN.md) describes the workflow, and [EVALUATION.md](./EVALUATION.md) is the candid engineering retrospective.
+
 ## Prerequisites
 
 - Node.js 20.9 or newer
