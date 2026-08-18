@@ -117,7 +117,7 @@ To apply migrations without seeding, provide `DATABASE_URL` directly because
 `pnpm db:migrate` does not load `.env.local`:
 
 ```bash
-DATABASE_URL='postgresql://signalroom:signalroom@localhost:5432/signal_room' pnpm db:migrate
+DATABASE_URL='postgresql://signalroom:local-development-only@localhost:5432/signal_room' pnpm db:migrate
 ```
 
 `pnpm db:generate` is for maintainers creating migration files after an approved schema change. It is not needed to initialize a clone.
