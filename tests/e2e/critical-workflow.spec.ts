@@ -25,7 +25,9 @@ test("critical authenticated incident workflow", async ({ page }) => {
   await expect(page).toHaveURL(/\/w\/operations$/);
 
   await page.getByRole("link", { name: "New incident" }).click();
+  await expect(page.getByText("0 / 200 characters", { exact: true })).toBeVisible();
   await page.getByLabel("Title").fill("Production workflow incident");
+  await expect(page.getByText("28 / 200 characters", { exact: true })).toBeVisible();
   await page.getByLabel("Description").fill("Verified through the complete application stack");
   await page.getByLabel("Status").selectOption("open");
   await page.getByLabel("Severity").selectOption("sev2");

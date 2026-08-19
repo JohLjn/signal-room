@@ -12,6 +12,7 @@ import styles from "./incident.module.css";
 export function IncidentForm({ workspaceSlug, members }: { workspaceSlug: string; members: MemberOption[] }) {
   const [error, setError] = useState("");
   const [pending, setPending] = useState(false);
+  const [title, setTitle] = useState("");
 
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -33,7 +34,16 @@ export function IncidentForm({ workspaceSlug, members }: { workspaceSlug: string
     <form className={`${styles.formCard} ${styles.createForm}`} onSubmit={submit}>
       <div className={styles.field}>
         <label htmlFor="incident-title">Title</label>
-        <input id="incident-title" name="title" required maxLength={200} />
+        <input
+          aria-describedby="incident-title-count"
+          id="incident-title"
+          maxLength={200}
+          name="title"
+          onChange={(event) => setTitle(event.target.value)}
+          required
+          value={title}
+        />
+        <p className={styles.fieldHint} id="incident-title-count">{title.length} / 200 characters</p>
       </div>
       <div className={styles.field}>
         <label htmlFor="incident-description">Description</label>
