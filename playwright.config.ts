@@ -1,3 +1,5 @@
+import { join } from "node:path";
+
 import { defineConfig, devices } from "@playwright/test";
 
 const testDatabaseUrl = process.env.TEST_DATABASE_URL;
@@ -11,6 +13,8 @@ if (process.env.DATABASE_URL && process.env.DATABASE_URL === testDatabaseUrl) {
 }
 
 const baseURL = "http://127.0.0.1:3100";
+const nextCli = join(process.cwd(), "node_modules", "next", "dist", "bin", "next");
+const nextStartCommand = `"${process.execPath}" "${nextCli}" start --hostname 127.0.0.1 --port 3100`;
 
 export default defineConfig({
   testDir: ".",
@@ -34,7 +38,7 @@ export default defineConfig({
     },
   ],
   webServer: {
-    command: "./node_modules/.bin/next start --hostname 127.0.0.1 --port 3100",
+    command: nextStartCommand,
     url: baseURL,
     reuseExistingServer: false,
     timeout: 120_000,
